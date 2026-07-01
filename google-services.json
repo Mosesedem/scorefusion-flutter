@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "728262705424",
+    "project_id": "score-fusion",
+    "storage_bucket": "score-fusion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:728262705424:android:89945baac012856f41e595",
+        "android_client_info": {
+          "package_name": "com.scorefusion.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_3AbZynGxLNHVQpO5zNFSNoHZW_Zfc48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
