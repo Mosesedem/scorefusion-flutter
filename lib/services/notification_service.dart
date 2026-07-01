@@ -115,11 +115,10 @@ class NotificationService {
   }
 
   Future<void> clearBadge() async {
-    if (Platform.isIOS) {
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(badge: true);
+    final status = await permissionStatus();
+    if (status != AuthorizationStatus.authorized &&
+        status != AuthorizationStatus.provisional) {
+      return;
     }
     await _localNotifications.cancelAll();
   }

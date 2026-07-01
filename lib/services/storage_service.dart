@@ -13,6 +13,16 @@ class StorageService {
     return prefs.getString(key);
   }
 
+  Future<void> saveBool(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  Future<bool> getBool(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(key) ?? false;
+  }
+
   Future<void> saveDismissUntil(String key, DateTime until) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, jsonEncode({'timestamp': until.millisecondsSinceEpoch}));

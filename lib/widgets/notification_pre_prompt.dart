@@ -23,31 +23,15 @@ class NotificationPrePrompt extends StatefulWidget {
 class _NotificationPrePromptState extends State<NotificationPrePrompt>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<Offset> _slide;
-  late final Animation<double> _fade;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
-      reverseDuration: const Duration(milliseconds: 280),
+      duration: const Duration(milliseconds: 320),
+      reverseDuration: const Duration(milliseconds: 240),
     );
-    _slide = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    ));
-    _fade = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
-    );
-
     if (widget.visible) _controller.forward();
   }
 
@@ -73,10 +57,11 @@ class _NotificationPrePromptState extends State<NotificationPrePrompt>
       return const SizedBox.shrink();
     }
 
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final dialogWidth = MediaQuery.sizeOf(context).width;
+    final maxWidth = dialogWidth * 0.9 > 400 ? 400.0 : dialogWidth * 0.9;
 
     return FadeTransition(
-      opacity: _fade,
+      opacity: CurvedAnimation(parent: _controller, curve: Curves.easeOut),
       child: Stack(
         children: [
           Positioned.fill(
@@ -85,120 +70,109 @@ class _NotificationPrePromptState extends State<NotificationPrePrompt>
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
                 child: Container(
-                  color: Colors.black.withValues(alpha: 0.28),
+                  color: Colors.black.withValues(alpha: 0.32),
                 ),
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SlideTransition(
-              position: _slide,
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16, 0, 16, bottomInset > 0 ? 8 : 20),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.14),
-                          blurRadius: 32,
-                          offset: const Offset(0, -6),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 4,
-                            margin: const EdgeInsets.only(bottom: 20),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFDADCE0),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const _NotificationHero(),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Stay on top of every match',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF202124),
-                              letterSpacing: -0.3,
-                              height: 1.2,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Turn on alerts to get live scores, final results, and breaking news the moment they happen.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF5F6368),
-                              height: 1.45,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 20),
-                          const _NotificationPreviewList(),
-                          const SizedBox(height: 20),
-                          const _BenefitChips(),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: FilledButton(
-                              onPressed: widget.onAllow,
-                              style: FilledButton.styleFrom(
-                                backgroundColor:
-                                    const Color(AppConstants.orangeValue),
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
-                              child: const Text(
-                                'Enable notifications',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.1,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          TextButton(
-                            onPressed: widget.onSkip,
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF5F6368),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                            ),
-                            child: const Text(
-                              'Not now',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
+          SafeArea(
+            child: Center(
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.92, end: 1).animate(
+                  CurvedAnimation(
+                    parent: _controller,
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                  ),
+                ),
+                child: Container(
+                  width: maxWidth,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.14),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
                       ),
-                    ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _NotificationHero(),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Stay on top of every match',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF202124),
+                          letterSpacing: -0.3,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Enable push alerts for live scores, final results, and breaking news — delivered the moment they happen.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF5F6368),
+                          height: 1.45,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      const _NotificationPreviewList(),
+                      const SizedBox(height: 16),
+                      const _BenefitChips(),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: FilledButton(
+                          onPressed: widget.onAllow,
+                          style: FilledButton.styleFrom(
+                            backgroundColor:
+                                const Color(AppConstants.orangeValue),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            'Enable notifications',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      TextButton(
+                        onPressed: widget.onSkip,
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF5F6368),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: const Text(
+                          'Not now',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

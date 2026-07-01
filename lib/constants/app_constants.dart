@@ -12,6 +12,7 @@ class AppConstants {
 
   static const String fcmTokenKey = 'expoPushToken';
   static const String socialPopupDismissKey = '@social_popup_dismiss';
+  static const String notificationPrePromptKey = '@notification_pre_prompt_handled';
 
   static const Duration oneDay = Duration(days: 1);
   static const Duration threeDays = Duration(days: 3);

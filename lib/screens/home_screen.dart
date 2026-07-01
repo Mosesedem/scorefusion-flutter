@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_constants.dart';
 import '../services/connectivity_service.dart';
 import '../services/notification_service.dart';
+import '../services/storage_service.dart';
 import '../utils/url_utils.dart';
 import '../widgets/error_screen.dart';
 import '../widgets/notification_denied_banner.dart';
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       widget._connectivityService ?? ConnectivityService();
   late final NotificationService _notifications =
       widget._notificationService ?? NotificationService();
+  final StorageService _storage = StorageService();
 
   InAppWebViewController? _webViewController;
   StreamSubscription<bool>? _connectivitySub;
@@ -54,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _fcmToken;
   bool _showPrePrompt = false;
   bool _notificationDenied = false;
+  bool _notificationFlowComplete = false;
 
   PullToRefreshController? _pullToRefreshController;
 
@@ -98,6 +101,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (savedToken != null) _fcmToken = savedToken;
 
       final status = await _notifications.permissionStatus();
+      final prePromptHandled = await _storage.getBool(
+        AppConstants.notificationPrePromptKey,
+      );
+
       if (status == AuthorizationStatus.authorized ||
           status == AuthorizationStatus.provisional) {
         final token = await _notifications.getFcmToken();
@@ -105,12 +112,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _fcmToken = token;
           _notificationDenied = false;
         }
-      } else if (status == AuthorizationStatus.denied) {
-        _notificationDenied = true;
-      } else {
-        Future<void>.delayed(const Duration(milliseconds: 2500), () {
-          if (mounted) setState(() => _showPrePrompt = true);
-        });
+        await _storage.saveBool(AppConstants.notificationPrePromptKey, true);
+        _notificationFlowComplete = true;
+      } else if (prePromptHandled) {
+        _notificationDenied = status == AuthorizationStatus.denied;
+        _notificationFlowComplete = true;
       }
 
       _notifications.onTokenRefresh((token) {
@@ -137,8 +143,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             _isLoading = false;
           });
           _startConnectivityListener();
+          _maybeShowNotificationPrePrompt();
         });
       }
+    }
+  }
+
+  Future<void> _maybeShowNotificationPrePrompt() async {
+    if (_notificationFlowComplete) return;
+
+    final prePromptHandled = await _storage.getBool(
+      AppConstants.notificationPrePromptKey,
+    );
+    if (prePromptHandled || !mounted) return;
+
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+
+    setState(() => _showPrePrompt = true);
+  }
+
+  Future<void> _completePrePrompt({required bool requestSystemPermission}) async {
+    await _storage.saveBool(AppConstants.notificationPrePromptKey, true);
+    if (!mounted) return;
+
+    setState(() {
+      _showPrePrompt = false;
+      _notificationFlowComplete = true;
+    });
+
+    if (requestSystemPermission) {
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (mounted) await _requestSystemPermission();
     }
   }
 
@@ -485,17 +521,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              const SocialFollowModal(),
+              SocialFollowModal(enabled: _notificationFlowComplete),
               NotificationPrePrompt(
                 visible: _showPrePrompt,
-                onAllow: () {
-                  setState(() => _showPrePrompt = false);
-                  Future<void>.delayed(
-                    const Duration(milliseconds: 400),
-                    _requestSystemPermission,
-                  );
-                },
-                onSkip: () => setState(() => _showPrePrompt = false),
+                onAllow: () => _completePrePrompt(requestSystemPermission: true),
+                onSkip: () => _completePrePrompt(requestSystemPermission: false),
               ),
             ],
           ),

@@ -5,10 +5,14 @@ import '../constants/app_constants.dart';
 import '../services/storage_service.dart';
 
 class SocialFollowModal extends StatefulWidget {
-  const SocialFollowModal({super.key, StorageService? storage})
-      : _storage = storage;
+  const SocialFollowModal({
+    super.key,
+    StorageService? storage,
+    this.enabled = true,
+  }) : _storage = storage;
 
   final StorageService? _storage;
+  final bool enabled;
 
   @override
   State<SocialFollowModal> createState() => _SocialFollowModalState();
@@ -58,7 +62,17 @@ class _SocialFollowModalState extends State<SocialFollowModal>
       vsync: this,
       duration: const Duration(milliseconds: 320),
     );
-    _checkShouldShow();
+    if (widget.enabled) {
+      _checkShouldShow();
+    }
+  }
+
+  @override
+  void didUpdateWidget(SocialFollowModal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled && !oldWidget.enabled && !_visible) {
+      _checkShouldShow();
+    }
   }
 
   @override
