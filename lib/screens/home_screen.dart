@@ -333,23 +333,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  color: Color(AppConstants.orangeValue),
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    color: Color(AppConstants.orangeValue),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Initializing your experience…',
-                style: TextStyle(fontSize: 15, color: Color(0xFF888888)),
-              ),
-            ],
+                SizedBox(height: 16),
+                Text(
+                  'Initializing your experience…',
+                  style: TextStyle(fontSize: 15, color: Color(0xFF888888)),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -365,101 +367,123 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark.copyWith(
-          statusBarColor: Colors.white,
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
           systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
         ),
         child: Scaffold(
           backgroundColor: Colors.white,
           body: Stack(
             children: [
-              Column(
-                children: [
-                  if (_notificationDenied)
-                    NotificationDeniedBanner(
-                      onOpenSettings: _openNotificationSettings,
-                      onDismiss: () => setState(() => _notificationDenied = false),
-                    ),
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        InAppWebView(
-                          key: ValueKey<int>(_webViewKey),
-                          initialUrlRequest: URLRequest(
-                            url: WebUri(AppConstants.webUrl),
-                          ),
-                          initialSettings: InAppWebViewSettings(
-                            javaScriptEnabled: true,
-                            domStorageEnabled: true,
-                            databaseEnabled: true,
-                            cacheEnabled: true,
-                            allowsInlineMediaPlayback: true,
-                            mediaPlaybackRequiresUserGesture: false,
-                            useHybridComposition: true,
-                            userAgent: AppConstants.userAgentForPlatform(isIOS: isIOS),
-                            transparentBackground: true,
-                            supportZoom: false,
-                            verticalScrollBarEnabled: true,
-                            horizontalScrollBarEnabled: false,
-                            allowsBackForwardNavigationGestures: isIOS,
-                          ),
-                          pullToRefreshController:
-                              Platform.isAndroid ? _pullToRefreshController : null,
-                          onWebViewCreated: (controller) {
-                            _webViewController = controller;
-                          },
-                          onLoadStart: (controller, url) {
-                            if (!mounted) return;
-                            setState(() {
-                              _webViewLoading = true;
-                              _webViewError = false;
-                            });
-                          },
-                          onLoadStop: (controller, _) async {
-                            if (!mounted) return;
-                            setState(() => _webViewLoading = false);
-                            _pullToRefreshController?.endRefreshing();
-
-                            if (_fcmToken != null) {
-                              final status = await _notifications.permissionStatus();
-                              final statusLabel =
-                                  status == AuthorizationStatus.authorized ||
-                                          status == AuthorizationStatus.provisional
-                                      ? 'granted'
-                                      : status.name;
-                              await _sendTokenToWebView(_fcmToken!, statusLabel);
-                            }
-                          },
-                          onReceivedError: (controller, request, error) {
-                            if (!mounted) return;
-                            setState(() {
-                              _webViewError = true;
-                              _webViewLoading = false;
-                            });
-                          },
-                          onUpdateVisitedHistory: (controller, url, isReload) async {
-                            final canGoBack = await controller.canGoBack();
-                            if (mounted) setState(() => _canGoBack = canGoBack);
-                            if (shouldBlockUrl(url?.toString())) {
-                              _handleLoginRedirect();
-                            }
-                          },
-                          shouldOverrideUrlLoading: _handleNavigation,
-                          onProgressChanged: (controller, progress) {
-                            if (progress == 100) {
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: MediaQuery.paddingOf(context).top,
+                child: const ColoredBox(color: Colors.white),
+              ),
+              SafeArea(
+                child: Column(
+                  children: [
+                    if (_notificationDenied)
+                      NotificationDeniedBanner(
+                        onOpenSettings: _openNotificationSettings,
+                        onDismiss: () =>
+                            setState(() => _notificationDenied = false),
+                      ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          InAppWebView(
+                            key: ValueKey<int>(_webViewKey),
+                            initialUrlRequest: URLRequest(
+                              url: WebUri(AppConstants.webUrl),
+                            ),
+                            initialSettings: InAppWebViewSettings(
+                              javaScriptEnabled: true,
+                              domStorageEnabled: true,
+                              databaseEnabled: true,
+                              cacheEnabled: true,
+                              allowsInlineMediaPlayback: true,
+                              mediaPlaybackRequiresUserGesture: false,
+                              useHybridComposition: true,
+                              userAgent:
+                                  AppConstants.userAgentForPlatform(isIOS: isIOS),
+                              transparentBackground: true,
+                              supportZoom: false,
+                              verticalScrollBarEnabled: true,
+                              horizontalScrollBarEnabled: false,
+                              allowsBackForwardNavigationGestures: isIOS,
+                            ),
+                            pullToRefreshController: Platform.isAndroid
+                                ? _pullToRefreshController
+                                : null,
+                            onWebViewCreated: (controller) {
+                              _webViewController = controller;
+                            },
+                            onLoadStart: (controller, url) {
+                              if (!mounted) return;
+                              setState(() {
+                                _webViewLoading = true;
+                                _webViewError = false;
+                              });
+                            },
+                            onLoadStop: (controller, _) async {
+                              if (!mounted) return;
+                              setState(() => _webViewLoading = false);
                               _pullToRefreshController?.endRefreshing();
-                            }
-                          },
-                        ),
-                        if (_webViewLoading)
-                          Preloader(
-                            onAutoHide: () {
-                              if (mounted) setState(() => _webViewLoading = false);
+
+                              if (_fcmToken != null) {
+                                final status =
+                                    await _notifications.permissionStatus();
+                                final statusLabel =
+                                    status == AuthorizationStatus.authorized ||
+                                            status ==
+                                                AuthorizationStatus.provisional
+                                        ? 'granted'
+                                        : status.name;
+                                await _sendTokenToWebView(_fcmToken!, statusLabel);
+                              }
+                            },
+                            onReceivedError: (controller, request, error) {
+                              if (!mounted) return;
+                              setState(() {
+                                _webViewError = true;
+                                _webViewLoading = false;
+                              });
+                            },
+                            onUpdateVisitedHistory:
+                                (controller, url, isReload) async {
+                              final canGoBack = await controller.canGoBack();
+                              if (mounted) {
+                                setState(() => _canGoBack = canGoBack);
+                              }
+                              if (shouldBlockUrl(url?.toString())) {
+                                _handleLoginRedirect();
+                              }
+                            },
+                            shouldOverrideUrlLoading: _handleNavigation,
+                            onProgressChanged: (controller, progress) {
+                              if (progress == 100) {
+                                _pullToRefreshController?.endRefreshing();
+                              }
                             },
                           ),
-                      ],
+                          if (_webViewLoading)
+                            Preloader(
+                              onAutoHide: () {
+                                if (mounted) {
+                                  setState(() => _webViewLoading = false);
+                                }
+                              },
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SocialFollowModal(),
               NotificationPrePrompt(

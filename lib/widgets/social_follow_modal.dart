@@ -20,12 +20,43 @@ class _SocialFollowModalState extends State<SocialFollowModal>
   late final AnimationController _controller;
   bool _visible = false;
 
+  static const _channels = [
+    _ContactChannel(
+      label: 'WhatsApp',
+      subtitle: 'Chat with us',
+      color: Color(0xFF25D366),
+      icon: Icons.chat_rounded,
+      linkKey: 'whatsapp',
+    ),
+    _ContactChannel(
+      label: 'Telegram',
+      subtitle: 'Direct message',
+      color: Color(0xFF0088CC),
+      icon: Icons.send_rounded,
+      linkKey: 'telegram',
+    ),
+    _ContactChannel(
+      label: 'Channel',
+      subtitle: 'Join updates',
+      color: Color(0xFF229ED9),
+      icon: Icons.campaign_rounded,
+      linkKey: 'channel',
+    ),
+    _ContactChannel(
+      label: 'Email',
+      subtitle: 'Send a message',
+      color: Color(0xFFEA4335),
+      icon: Icons.mail_rounded,
+      linkKey: 'email',
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 320),
     );
     _checkShouldShow();
   }
@@ -68,179 +99,226 @@ class _SocialFollowModalState extends State<SocialFollowModal>
   Widget build(BuildContext context) {
     if (!_visible) return const SizedBox.shrink();
 
-    final width = MediaQuery.sizeOf(context).width;
+    final dialogWidth = MediaQuery.sizeOf(context).width;
+    final maxWidth = dialogWidth * 0.9 > 420 ? 420.0 : dialogWidth * 0.9;
 
     return FadeTransition(
-      opacity: _controller,
-      child: Material(
-        color: const Color(0x99000000),
-        child: Center(
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.9, end: 1).animate(
-              CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      opacity: CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Material(
+              color: Colors.black.withValues(alpha: 0.45),
             ),
-            child: Container(
-              width: width * 0.85 > 400 ? 400 : width * 0.85,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+          ),
+          SafeArea(
+            child: Center(
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.94, end: 1).animate(
+                  CurvedAnimation(
+                    parent: _controller,
+                    curve: Curves.easeOutCubic,
                   ),
-                ],
-              ),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Connect With Us',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Follow and connect with us for updates, tips, and exclusive content!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF666666),
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    alignment: WrapAlignment.spaceAround,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _SocialButton(
-                        label: 'Whatsapp',
-                        color: const Color(0xFF25D366),
-                        icon: Icons.chat_bubble_outline,
-                        onTap: () => _openLink(AppConstants.socialLinks['whatsapp']!),
-                      ),
-                      _SocialButton(
-                        label: 'Telegram',
-                        color: const Color(0xFF0088CC),
-                        icon: Icons.send_outlined,
-                        onTap: () => _openLink(AppConstants.socialLinks['telegram']!),
-                      ),
-                      _SocialButton(
-                        label: 'Telegram Channel',
-                        color: const Color(0xFF0088CC),
-                        icon: Icons.groups_outlined,
-                        onTap: () => _openLink(AppConstants.socialLinks['channel']!),
-                      ),
-                      _SocialButton(
-                        label: 'Email',
-                        color: Colors.black,
-                        icon: Icons.mail_outline,
-                        onTap: () => _openLink(AppConstants.socialLinks['email']!),
+                ),
+                child: Container(
+                  width: maxWidth,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () => _handleDismiss(AppConstants.oneDay),
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFFF0F0F0),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: const Color(AppConstants.orangeValue)
+                              .withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.support_agent_rounded,
+                          size: 28,
+                          color: Color(AppConstants.orangeValue),
                         ),
                       ),
-                      child: const Text(
-                        'Remind me later',
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Contact Us',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 22,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: Color(0xFF1A1A1A),
+                          letterSpacing: -0.3,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () => _handleDismiss(AppConstants.threeDays),
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFFE8E8E8),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Don't show for now",
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Reach out on your preferred channel for support, updates, and VIP subscriptions.',
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          fontSize: 14,
+                          color: Color(0xFF5F6368),
+                          height: 1.45,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 1.05,
+                        ),
+                        itemCount: _channels.length,
+                        itemBuilder: (context, index) {
+                          final channel = _channels[index];
+                          return _ContactGridTile(
+                            channel: channel,
+                            onTap: () => _openLink(
+                              AppConstants.socialLinks[channel.linkKey]!,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  _handleDismiss(AppConstants.oneDay),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF3C4043),
+                                side: const BorderSide(color: Color(0xFFDADCE0)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Text(
+                                'Later',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () =>
+                                  _handleDismiss(AppConstants.threeDays),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF5F6368),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Text(
+                                'Dismiss',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
+class _ContactChannel {
+  const _ContactChannel({
     required this.label,
+    required this.subtitle,
     required this.color,
     required this.icon,
-    required this.onTap,
+    required this.linkKey,
   });
 
   final String label;
+  final String subtitle;
   final Color color;
   final IconData icon;
+  final String linkKey;
+}
+
+class _ContactGridTile extends StatelessWidget {
+  const _ContactGridTile({
+    required this.channel,
+    required this.onTap,
+  });
+
+  final _ContactChannel channel;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final itemWidth = (MediaQuery.sizeOf(context).width * 0.85 > 400
-            ? 400
-            : MediaQuery.sizeOf(context).width * 0.85) *
-        0.45;
-
-    return SizedBox(
-      width: itemWidth,
+    return Material(
+      color: const Color(0xFFF8F9FA),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 32, color: color),
-              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: channel.color.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(channel.icon, size: 22, color: channel.color),
+              ),
+              const Spacer(),
               Text(
-                label,
+                channel.label,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF333333),
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF202124),
                 ),
-                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                channel.subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF5F6368),
+                ),
               ),
             ],
           ),
