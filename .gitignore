@@ -42,6 +42,12 @@ app.*.map.json
 # Local env files
 .env*.local
 
+# Android release signing (never commit)
+android/key.properties
+android/app/upload-keystore.jks
+*.jks
+*.keystore
+
 # Firebase admin keys
 scorefusion-d26f2-firebase-adminsdk-fbsvc-4055699e9f.json
 score-fusion-firebase-adminsdk-fbsvc-b49b677dd4.json
