@@ -29,7 +29,7 @@ class AppConstants {
     'email':
         'mailto:Scorefusionn@gmail.com?subject=VIP%20Subscription%20Payment&body=Hi,%0D%0A%0D%0AI%20want%20to%20subscribe%20to%20the%20',
     'whatsapp':
-        'https://api.whatsapp.com/send?phone=84589950720&text=Hello%2C%20I%20would%20like%20to%20get%20in%20touch%20with%20Score%20Fusion.',
+        'https://api.whatsapp.com/send?phone=84867084414&text=Hi%20Score%20Fusion%21%20I%20would%20like%20to%20get%20premium%20VIP%20tips.',
   };
 
   static String userAgentForPlatform({required bool isIOS}) {

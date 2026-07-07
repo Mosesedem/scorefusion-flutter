@@ -1,35 +1,23 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class ConnectivityService {
-  ConnectivityService({
-    Connectivity? connectivity,
-    InternetConnection? internetConnection,
-  })  : _connectivity = connectivity ?? Connectivity(),
-        _internetConnection = internetConnection ?? InternetConnection();
+  ConnectivityService({Connectivity? connectivity})
+      : _connectivity = connectivity ?? Connectivity();
 
   final Connectivity _connectivity;
-  final InternetConnection _internetConnection;
 
   Future<bool> hasConnection() async {
     try {
       final results = await _connectivity.checkConnectivity();
-      final hasNetwork = results.any((r) => r != ConnectivityResult.none);
-      if (!hasNetwork) return false;
-      return _internetConnection.hasInternetAccess;
+      return results.any((r) => r != ConnectivityResult.none);
     } catch (_) {
       return false;
     }
   }
 
-  Stream<bool> onConnectivityChanged() async* {
-    await for (final results in _connectivity.onConnectivityChanged) {
-      final hasNetwork = results.any((r) => r != ConnectivityResult.none);
-      if (!hasNetwork) {
-        yield false;
-        continue;
-      }
-      yield await _internetConnection.hasInternetAccess;
-    }
+  Stream<bool> onConnectivityChanged() {
+    return _connectivity.onConnectivityChanged.map(
+      (results) => results.any((r) => r != ConnectivityResult.none),
+    );
   }
 }
